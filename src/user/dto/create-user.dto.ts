@@ -27,9 +27,8 @@ class CreateUserDto {
   email: string;
 
   @ApiProperty({ example: "https://example.com/avatar.jpg", required: false })
-  @IsOptional()
   @IsString()
-  avatar?: string;
+  avatar: string;
 
   @ApiProperty({ example: "1985-06-15" })
   @IsString()

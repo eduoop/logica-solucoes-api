@@ -1,61 +1,164 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import * as fs from 'fs';
 import * as path from 'path';
-
-interface User {
-  id: string;
-  first_name: string;
-  last_name: string;
-  username: string;
-  email: string;
-  avatar: string;
-  date_of_birth: string;
-  phone_number: string;
-}
+import { User } from 'src/utils/interfaces/user.model';
+import * as fastCsv from 'fast-csv';
 
 @Injectable()
 export class CsvService implements OnModuleInit {
-  private readonly filePath = path.resolve('database.csv');  
+  private readonly filePath = path.resolve('database.csv');
   private usersData: User[] = [];
 
   onModuleInit() {
     this.loadCsvData();
   }
 
-  private loadCsvData() {
+  private async loadCsvData(): Promise<void> {
     if (fs.existsSync(this.filePath)) {
-      const csvFile = fs.readFileSync(this.filePath, 'utf8');
-      
-      if (csvFile.length > 0) {
-        
-        const rows = csvFile.split(/\r?\n/).slice(1);
+      const stream = fs.createReadStream(this.filePath);
 
-        this.usersData = rows.map((row) => {
-          const columns = row.split(',');  
-          if (columns.length === 8) {  
-            const [id, first_name, last_name, username, email, avatar, date_of_birth, phone_number] = columns;
-            return {
-              id,
-              first_name,
-              last_name,
-              username,
-              email,
-              avatar,
-              date_of_birth,
-              phone_number,
-            };
-          }
-          return null;  
-        }).filter(user => user !== null);
-      } else {
-        console.error('Arquivo CSV está vazio!');
-      }
+      this.usersData = [];
+
+      return new Promise((resolve, reject) => {
+        fastCsv.parseStream(stream, { headers: true })
+          .on('data', (row) => {
+            const { id, first_name, last_name, username, email, avatar, date_of_birth, phone_number } = row;
+            if (id && first_name && last_name && username && email && avatar && date_of_birth && phone_number) {
+              this.usersData.push({
+                id: Number(id),
+                first_name,
+                last_name,
+                username,
+                email,
+                avatar,
+                date_of_birth,
+                phone_number,
+              });
+            }
+          })
+          .on('end', () => {
+            console.log('Arquivo CSV carregado com sucesso');
+            resolve();
+          })
+          .on('error', (error) => {
+            console.error('Erro ao processar o arquivo CSV:', error);
+            reject(error);
+          });
+      });
     } else {
       console.error('Arquivo CSV não encontrado!');
     }
   }
 
-  getUsers(): User[] {
+  private async saveUsers(): Promise<void> {
+
+    if (this.usersData.length === 0) {
+      fs.writeFileSync(this.filePath, '');
+      return;
+    }
+
+    const writeStream = fs.createWriteStream(this.filePath);
+    const csvContent = fastCsv.format({ headers: true });
+
+    csvContent.write([
+      'id', 'first_name', 'last_name', 'username', 'email', 'avatar', 'date_of_birth', 'phone_number'
+    ]);
+
+    this.usersData.forEach(user => {
+      csvContent.write([
+        user.id,
+        user.first_name,
+        user.last_name,
+        user.username,
+        user.email,
+        user.avatar,
+        user.date_of_birth,
+        user.phone_number
+      ]);
+    });
+
+    csvContent.pipe(writeStream);
+  }
+
+  async addUsers(users: User[]): Promise<void> {
+    await this.loadCsvData();
+    const newUsers = users;
+    let csvContent = [];
+
+    if (fs.existsSync(this.filePath)) {
+      const csvFile = fs.readFileSync(this.filePath, 'utf8');
+
+      if (csvFile.length > 0) {
+        const existingData = csvFile.split('\n').slice(1).map((row) => {
+          const [id, first_name, last_name, username, email, avatar, date_of_birth, phone_number] = row.split(',');
+          return {
+            id: Number(id),
+            first_name,
+            last_name,
+            username,
+            email,
+            avatar,
+            date_of_birth,
+            phone_number,
+          };
+        });
+
+        const newUserRows = newUsers.filter((user) => {
+          return !existingData.some(existingUser => existingUser.id === user.id);
+        }).map((user) => ({
+          id: Number(user.id),
+          first_name: user.first_name,
+          last_name: user.last_name,
+          username: user.username,
+          email: user.email,
+          avatar: user.avatar,
+          date_of_birth: user.date_of_birth,
+          phone_number: user.phone_number,
+        }));
+
+        const allData = [...existingData, ...newUserRows];
+        csvContent = allData;
+      } else {
+        csvContent = newUsers;
+      }
+    } else {
+      csvContent = newUsers;
+    }
+
+    this.usersData = csvContent;
+    await this.saveUsers();
+  }
+
+  async updateUser(id: number, updatedUser: User): Promise<void> {
+    const user = this.usersData.find(user => user.id === id);
+
+    if (!user) {
+      throw new Error(`Usuário não encontrado`);
+    }
+
+    Object.assign(user, updatedUser);
+
+    await this.saveUsers();
+  }
+
+  async removeUser(id: number): Promise<void> {
+    const userToRemove = await this.usersData.find(user => Number(user.id) === id);
+
+    if (!userToRemove) {
+      throw new Error(`Usuário não encontrado`);
+    }
+
+    this.usersData = this.usersData.filter(user => Number(user.id) !== id);
+
+    if (this.usersData.length === 0) {
+      this.usersData = [];
+    }
+
+    await this.saveUsers();
+  }
+
+  async getUsers(): Promise<User[]> {
+    await this.loadCsvData();
     return this.usersData;
   }
 }
