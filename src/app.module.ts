@@ -4,6 +4,7 @@ import { HttpModule } from '@nestjs/axios';
 import { ConfigModule, ConfigModule as ConfigModuleNest } from "@nestjs/config"
 import { envSchema } from './env/env';
 import { EnvModule } from './env/env.module';
+import { CsvModule } from './csv/csv.module';
 
 @Module({
   imports: [UserModule, HttpModule, ConfigModuleNest.forRoot({
@@ -11,6 +12,7 @@ import { EnvModule } from './env/env.module';
     isGlobal: true,
   }),
     EnvModule,
+    CsvModule,
     ConfigModule.forRoot({ isGlobal: true }),
   ],
 
