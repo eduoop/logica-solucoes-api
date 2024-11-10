@@ -56,6 +56,10 @@ Para rodar o projeto, abra um terminal na pasta do projeto e rode-o usando: <npm
 Acesse <http://localhost:3333/api> com a aplicação rodando para ver a documentação completa das rotas
 ```
 
+```
+Se quiser ver e testar as rotas da aplicação, arraste o arquivo "insomnia" na raiz do projeto para o aplicativo insomnia
+```
+
 ## 🔌 Consumindo
 
 ```
