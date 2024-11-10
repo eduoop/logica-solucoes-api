@@ -40,7 +40,7 @@ export class UserService {
       try {
         await this.csvService.addUsers(usersData.users)
       } catch (error) {
-        console.error('Erro ao processar os dados:', error);
+        console.log('Erro ao processar os dados:', error);
       }
     } catch (e) {
       if (e instanceof Array && e[0] instanceof ValidationError) {

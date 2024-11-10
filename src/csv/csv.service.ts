@@ -52,7 +52,7 @@ export class CsvService implements OnModuleInit {
           });
       });
     } else {
-      console.error('Arquivo CSV não encontrado!');
+      console.log('Arquivo CSV não encontrado. Adicione novos usuários e o arquivo será gerado automaticamente! ');
     }
   }
 
