@@ -8,14 +8,12 @@ import { CsvModule } from './csv/csv.module';
 import { RecordedUserModule } from './recorded-user/recorded-user.module';
 
 @Module({
-  imports: [UserModule, RecordedUserModule, HttpModule, ConfigModuleNest.forRoot({
+  imports: [UserModule, RecordedUserModule, CsvModule, HttpModule, ConfigModuleNest.forRoot({
     validate: (env) => envSchema.parse(env),
     isGlobal: true,
   }),
     EnvModule,
-    CsvModule,
     ConfigModule.forRoot({ isGlobal: true }),
-    RecordedUserModule,
   ],
 
   controllers: [],
