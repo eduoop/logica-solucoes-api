@@ -50,19 +50,22 @@ export class RecordedUserService {
     const userIndex = allUsers.findIndex(user => user.id === id);
 
     if (userIndex === -1) {
-      throw new Error(`Usuário não encontrado`);
+        throw new Error(`Usuário não encontrado`);
     }
 
-    const updatedUser = { ...allUsers[userIndex], ...updateRecordedUserDto };
+    const { first_name, last_name, username, email, avatar, date_of_birth, phone_number } = updateRecordedUserDto;
+    const updatedUserData = { first_name, last_name, username, email, avatar, date_of_birth, phone_number };
+
+    const updatedUser = { ...allUsers[userIndex], ...updatedUserData };
 
     allUsers[userIndex] = updatedUser;
 
     await this.csvService.updateUser(id, updatedUser);
 
     return {
-      updatedUser,
+        updatedUser,
     };
-  }
+}
 
   async remove(ids: number[]): Promise<{ message: string }> {
     try {
