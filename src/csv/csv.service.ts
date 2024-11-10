@@ -140,6 +140,7 @@ export class CsvService implements OnModuleInit {
   }
 
   async removeUsers(ids: number[]): Promise<void> {
+    await this.loadCsvData();
     const usersToRemove = this.usersData.filter(user => ids.includes(Number(user.id)));
 
     if (usersToRemove.length === 0) {
