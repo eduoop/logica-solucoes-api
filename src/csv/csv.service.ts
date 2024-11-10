@@ -37,11 +37,9 @@ export class CsvService implements OnModuleInit {
             }
           })
           .on('end', () => {
-            console.log('Arquivo CSV carregado com sucesso');
             resolve();
           })
           .on('error', (error) => {
-            console.error('Erro ao processar o arquivo CSV:', error);
             reject(error);
           });
       });
@@ -141,14 +139,14 @@ export class CsvService implements OnModuleInit {
     await this.saveUsers();
   }
 
-  async removeUser(id: number): Promise<void> {
-    const userToRemove = await this.usersData.find(user => Number(user.id) === id);
+  async removeUsers(ids: number[]): Promise<void> {
+    const usersToRemove = this.usersData.filter(user => ids.includes(Number(user.id)));
 
-    if (!userToRemove) {
-      throw new Error(`Usuário não encontrado`);
+    if (usersToRemove.length === 0) {
+      throw new Error('Nenhum usuário encontrado para remover');
     }
 
-    this.usersData = this.usersData.filter(user => Number(user.id) !== id);
+    this.usersData = this.usersData.filter(user => !ids.includes(Number(user.id)));
 
     if (this.usersData.length === 0) {
       this.usersData = [];

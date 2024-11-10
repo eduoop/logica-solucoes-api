@@ -31,7 +31,7 @@ export class RecordedUserService {
     const totalItems = filteredUsers.length;
 
     const startIndex = (page - 1) * limit;
-    const paginatedUsers = filteredUsers.slice(startIndex, startIndex + limit);
+    const paginatedUsers = filteredUsers.splice(startIndex, limit);
 
     const totalPages = Math.ceil(totalItems / limit);
 
@@ -64,12 +64,12 @@ export class RecordedUserService {
     };
   }
 
-  async remove(id: number) {
+  async remove(ids: number[]): Promise<{ message: string }> {
     try {
-      await this.csvService.removeUser(id);
-      return { message: 'Usuário removido com sucesso' };
+      await this.csvService.removeUsers(ids);
+      return { message: 'Usuários removidos com sucesso' };
     } catch (e) {
-      throw new Error(e.message || 'Erro ao remover o usuário');
+      throw new Error(e.message || 'Erro ao remover os usuários');
     }
   }
 }

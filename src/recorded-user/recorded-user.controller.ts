@@ -20,8 +20,10 @@ export class RecordedUserController {
     return this.recordedUserService.update(+id, updateRecordedUserDto);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.recordedUserService.remove(+id);
+  @Delete()
+  remove(@Body() body: {
+    ids: number[]
+  }) {
+    return this.recordedUserService.remove(body.ids);
   }
 }

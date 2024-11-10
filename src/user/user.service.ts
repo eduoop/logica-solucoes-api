@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, HttpStatus, Injectable } from '@nestjs/common';
 import { map, Observable } from 'rxjs';
 import { HttpService } from '@nestjs/axios';
 import { EnvService } from 'src/env/env.service';
@@ -9,7 +9,7 @@ import { CsvService } from 'src/csv/csv.service';
 @Injectable()
 export class UserService {
   constructor(
-    private readonly httpService: HttpService, 
+    private readonly httpService: HttpService,
     private readonly envService: EnvService,
     private readonly csvService: CsvService,
   ) { }
@@ -38,8 +38,8 @@ export class UserService {
 
       await validateOrReject(createUserDto);
       try {
-      this.csvService.addUsers(usersData.users)
-      }  catch (error) {
+        await this.csvService.addUsers(usersData.users)
+      } catch (error) {
         console.error('Erro ao processar os dados:', error);
       }
     } catch (e) {
