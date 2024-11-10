@@ -1,24 +1,18 @@
-import { HttpCode, Injectable, OnModuleInit } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import * as fs from 'fs';
 import * as path from 'path';
 import { User } from 'src/utils/interfaces/user.model';
 import * as fastCsv from 'fast-csv';
 
 @Injectable()
-export class CsvService implements OnModuleInit {
+export class CsvService {
   private readonly filePath = path.resolve('database.csv');
   private usersData: User[] = [];
 
-  onModuleInit() {
-    this.loadCsvData();
-  }
-
   async getRawCsv(): Promise<string> {
-    if (!fs.existsSync(this.filePath)) {
-      throw new Error(`Arquivo não encontrado`);
+    if (fs.existsSync(this.filePath)) {
+      return fs.readFileSync(this.filePath, 'utf8');
     }
-
-    return fs.readFileSync(this.filePath, 'utf8');
   }
 
   private async loadCsvData(): Promise<void> {
