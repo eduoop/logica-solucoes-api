@@ -128,6 +128,7 @@ export class CsvService implements OnModuleInit {
   }
 
   async updateUser(id: number, updatedUser: User): Promise<void> {
+    await this.loadCsvData();
     const user = this.usersData.find(user => user.id === id);
 
     if (!user) {
